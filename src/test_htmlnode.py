@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_init(self):
@@ -32,6 +32,35 @@ class TestHTMLNode(unittest.TestCase):
     def test_to_html_not_implemented(self):
         node = HTMLNode("div", "Test")
         with self.assertRaises(NotImplementedError):
+            node.to_html()
+
+
+class TestLeafNode(unittest.TestCase):
+    def test_leaf_to_html_p(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+    
+    def test_leaf_to_html_with_props(self):
+        node = LeafNode("span", "Highlight", {"class": "highlight", "id": "h1"})
+        # Order of props in string may vary depending on Python version
+        html = node.to_html()
+        self.assertTrue(html.startswith('<span'))
+        self.assertIn('class="highlight"', html)
+        self.assertIn('id="h1"', html)
+        self.assertTrue(html.endswith('>Highlight</span>'))
+
+    def test_leaf_to_html_no_tag(self):
+        node = LeafNode(None, "Just text")
+        self.assertEqual(node.to_html(), "Just text")
+
+    def test_leaf_to_html_empty_value(self):
+        node = LeafNode("p", "")
+        with self.assertRaises(ValueError):
+            node.to_html()
+
+    def test_leaf_to_html_none_value(self):
+        node = LeafNode("p", None)
+        with self.assertRaises(ValueError):
             node.to_html()
 
 if __name__ == "__main__":
